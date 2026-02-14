@@ -1,0 +1,19 @@
+name: terraform-ci
+on: [pull_request, push]
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: fmt
+        run: terraform fmt -check -recursive
+      - name: init/validate (dev)
+        run: |
+          mkdir -p envs/dev
+          cd envs/dev
+          terraform init -backend=false
+          terraform validate || true
+      - uses: terraform-linters/setup-tflint@v4
+      - name: tflint
+        run: tflint --recursive || true
